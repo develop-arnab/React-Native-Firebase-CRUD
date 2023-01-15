@@ -50,22 +50,22 @@ export default function ProductsScreen({navigation}) {
   const Item = ({item}) => (
     <TouchableWithoutFeedback onPress={() => {editProduct(item)}}>
       <View style={styles.mainCardView}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{flexDirection: 'row', alignItems: 'center', width:'70%',}}>
           <View style={styles.subCardView}>
-            <Image
-              source={''}
+            {item.image && <Image
+              source={item.image}
               resizeMode="contain"
               style={{
                 borderRadius: 25,
                 height: 50,
                 width: 50,
               }}
-            />
+            />}
           </View>
           <View style={{marginLeft: 12}}>
             <Text
               style={{
-                fontSize: 14,
+                fontSize: 18,
                 color: 'black',
                 fontWeight: 'bold',
                 textTransform: 'capitalize',
@@ -82,7 +82,7 @@ export default function ProductsScreen({navigation}) {
                 <Text
                   style={{
                     color: 'gray',
-                    fontSize: 12,
+                    fontSize: 16,
                   }}>
                   {item.price}
                 </Text>
@@ -189,8 +189,8 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     borderRadius: 25,
-    backgroundColor: 'yellow',
-    borderColor: 'green',
+    backgroundColor: '#D3D3D3',
+    borderColor: 'grey',
     borderWidth: 1,
     borderStyle: 'solid',
     alignItems: 'center',

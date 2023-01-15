@@ -12,15 +12,23 @@ import {
   StyleSheet,
   Button,
   ToastAndroid,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
 import {auth, db} from '../config/firebaseConfig';
 import {addDoc, collection} from 'firebase/firestore/lite';
 import {useDispatch} from 'react-redux';
 import {getUserProducts} from '../redux/actions/userActions';
-import { getStorage, ref, uploadBytes } from 'firebase/storage'; //access the storage database
-// import ImagePicker from 'react-native-image-picker';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  uploadString,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import ImagePicker from 'react-native-image-crop-picker';
+import {decode as atob, encode as btoa} from 'base-64';
+import {Buffer} from 'buffer';
 
 export default function AddProducts() {
   const [name, setName] = useState('');
@@ -35,7 +43,7 @@ export default function AddProducts() {
           name: name,
           price: price,
           offer_price: offerPrice,
-          image: image
+          image: image,
         });
 
         console.log('Document written with ID: ', docRef.id);
@@ -56,34 +64,38 @@ export default function AddProducts() {
     }
   };
 
-  
   const chooseFile = async () => {
-    // const options = {
-    //   selectionLimit: 1,
-    //   mediaType: 'photo',
-    //   includeBase64: false,
-    // };
-    // launchImageLibrary(options, setImage);
-
-    let result = await launchImageLibrary({
-      mediaTypes:'photo',
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+      includeBase64: true,
+    }).then(image => {
+      console.log(image.data);
       const storage = getStorage(); //the storage itself
-      const ref = ref(storage, 'image.jpg'); //how the image will be addressed inside the storage
+      const storageRef = ref(storage, 'new'); //how the image will be addressed inside the storage
 
-      //convert image to array of bytes
-      const img = await fetch(result.uri);
-      console.log("WE GOT : ", img)
-      const bytes = await img.blob();
+      let image_bytes = Buffer.from(image.data, 'base64');
+      const blob = new Blob([image_bytes], {type: 'YOUR TYPE'});
+      const metadata = {
+        contentType: 'image/jpeg',
+      };
+      const task = uploadBytesResumable(storageRef, blob, metadata);
 
-      await uploadBytes(ref, bytes); //upload images
-    }
-
+      task.on(
+        'state_changed',
+        null,
+        error => {
+          // alert(error);
+        },
+        () => {
+          getDownloadURL(task.snapshot.ref).then(URL => {
+            console.log('URL OF IMAGE ', URL);
+            setImage(URL);
+          });
+        },
+      );
+    });
   };
 
   return (
@@ -113,17 +125,17 @@ export default function AddProducts() {
               style={styles.loginFormTextInput}
               onChangeText={input => setOfferPrice(input)}
             />
+            <TouchableOpacity
+              activeOpacity={0.5}
+              style={styles.buttonStyle}
+              onPress={chooseFile}>
+              <Text style={styles.textStyle}>Upload Product Image</Text>
+            </TouchableOpacity>
             <Button
               buttonStyle={styles.loginButton}
               onPress={() => addProduct()}
               title="Add Product"
             />
-            <TouchableOpacity
-              activeOpacity={0.5}
-              style={styles.buttonStyle}
-              onPress={chooseFile}>
-              <Text style={styles.textStyle}>Choose Image</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </TouchableWithoutFeedback>
