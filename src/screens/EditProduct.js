@@ -25,7 +25,7 @@ export default function Editproduct({navigation, route}) {
   const [docId, setDocId] = useState(route.params.docId ?? "")
   const dispatch = useDispatch();
 
-  const addProduct = async () => {
+  const editProduct = async () => {
     if (name && price && offerPrice) {
     try {
         const productsRef = doc(db, "Products", docId);
@@ -81,7 +81,7 @@ export default function Editproduct({navigation, route}) {
             />
             <Button
               buttonStyle={styles.loginButton}
-              onPress={() => addProduct()}
+              onPress={() => editProduct()}
               title="Update Product"
             />
           </View>

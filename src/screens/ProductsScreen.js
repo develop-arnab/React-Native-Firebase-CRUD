@@ -5,11 +5,8 @@ import {
   StatusBar,
 } from 'react-native';
 import React, { useEffect} from 'react';
-import {db} from '../config/firebaseConfig';
-import {doc, deleteDoc} from 'firebase/firestore/lite';
 import store from '../redux/store';
 import {useSelector, useDispatch} from 'react-redux';
-
 import { getUserProducts } from '../redux/actions/userActions';
 import ProductItem from '../components/ProductItem';
 
@@ -26,27 +23,13 @@ export default function ProductsScreen({navigation}) {
     console.log("ALL PRODUCTS : ", products)
   },[products])
 
-  const onDeletePress = async(item) => {
-    console.log("ITEM : ", item)
-    await deleteDoc(doc(db, "Products", item.id));
-    dispatch(getUserProducts());
-    
-  }
-
-  const editProduct = (item) => {
-    navigation.navigate('EditProduct', {
-      name : item.name,
-      price: item.price,
-      offerPrice: item.offer_price,
-      docId: item.id
-    })
-  }
-
   const renderProduct = ({item}) => {
   return (  <ProductItem 
+    navigation={navigation}
     name={item.name}
     price={item.price}
     offerPrice={item.offer_price}
+    id={item.id}
     />)
    
   };

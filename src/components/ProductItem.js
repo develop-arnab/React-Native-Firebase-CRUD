@@ -1,9 +1,32 @@
 import { View, Text,TouchableWithoutFeedback,Image, StyleSheet } from 'react-native'
 import React from 'react'
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-export default function ProductItem({name, price, offerPrice, image}) {
+import {db} from '../config/firebaseConfig';
+import {doc, deleteDoc} from 'firebase/firestore/lite';
+import {useSelector, useDispatch} from 'react-redux';
+import { getUserProducts } from '../redux/actions/userActions';
+
+export default function ProductItem({navigation,name, price, offerPrice, image, id}) {
+
+  const dispatch = useDispatch();
+  const onDeletePress = async(id) => {
+    await deleteDoc(doc(db, "Products", id));
+    dispatch(getUserProducts());
+    
+  }
+
+  const editProduct = () => {
+    navigation.navigate('EditProduct', {
+      name : name,
+      price: price,
+      offerPrice: offerPrice,
+      docId: id
+    })
+  }
+
+  
   return (
-    <TouchableWithoutFeedback onPress={() => {editProduct(item)}}>
+    <TouchableWithoutFeedback onPress={() => {editProduct()}}>
       <View style={styles.mainCardView}>
         <View style={{flexDirection: 'row', alignItems: 'center', width:'70%',}}>
           <View style={styles.subCardView}>
@@ -71,7 +94,7 @@ export default function ProductItem({name, price, offerPrice, image}) {
             borderRadius: 50,
           }}
           onPress={() => {
-            editProduct(item)
+            editProduct()
           }}
           >
           <Icon size={24} color="black" name="pencil-outline" />
@@ -88,7 +111,7 @@ export default function ProductItem({name, price, offerPrice, image}) {
             borderRadius: 50,
           }}
           onPress={() => {
-            onDeletePress(item)
+            onDeletePress(id)
           }}
           >
           <Icon size={24} color="#FF9898" name="delete" />
